@@ -1,0 +1,24 @@
+{
+  "name": "delft-hub",
+  "version": "1.0.0",
+  "description": "",
+  "main": "hub.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/virgilvox/curie-ble-example-js.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/virgilvox/curie-ble-example-js/issues"
+  },
+  "homepage": "https://github.com/virgilvox/curie-ble-example-js#readme",
+  "dependencies": {
+    "noble": "^1.8.0",
+    "node-osc": "^2.1.0",
+    "rapidlib": "^1.0.5"
+  }
+}
