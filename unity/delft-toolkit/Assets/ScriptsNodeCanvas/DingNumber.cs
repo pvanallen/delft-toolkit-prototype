@@ -7,12 +7,12 @@ using UnityEngine;
 namespace NodeCanvas.Tasks.Conditions{
 
 	[Category(" DelftToolkit")]
-	public class DingData : ConditionTask{
+	public class DingNumber : ConditionTask{
 
 		//public enum EventTypes{button1, button2, button3, button4, button5, button6, button7, button8};
 		//public EventTypes eventType = EventTypes.button1;
 		//public bool toggleState = false;
-		public string matchDingMessage = "/analog/0";
+		public string matchDingMessage = "/ding1/a/0";
 		public CompareMethod checkType = CompareMethod.EqualTo;
 		public BBParameter<float> valueB;
 
@@ -25,11 +25,11 @@ namespace NodeCanvas.Tasks.Conditions{
 		public string incomingDingMessage = "";
 
 		protected override string info{
-			get	{return matchDingMessage + " " + value0 + OperationTools.GetCompareString(checkType) + valueB;}
+			get	{return matchDingMessage + "\n" + value0 + OperationTools.GetCompareString(checkType) + valueB;}
 		}
 
 		protected override bool OnCheck(){
-			if (incomingDingMessage == matchDingMessage) {
+			if (incomingDingMessage == "/num" + matchDingMessage) {
 				incomingDingMessage = "";
 				return OperationTools.Compare ((float)value0, (float)valueB.value, checkType, differenceThreshold);
 			} else {
@@ -39,19 +39,18 @@ namespace NodeCanvas.Tasks.Conditions{
 
 		protected override string OnInit() {
 			//UnityEngine.Debug.Log ("dingData INIT");
-			dingSensors.DingEvent += handleEvent;
+			dingSensors.DingNumEvent += handleEvent;
 			return null;
 		}
 
 		protected override void OnDisable() {
-			dingSensors.DingEvent -= handleEvent;
+			dingSensors.DingNumEvent -= handleEvent;
 		}
 
 		void handleEvent(string adrs, float val0, float val1, float val2) {
-
 			incomingDingMessage = adrs;
 			value0 = val0;
-			//UnityEngine.Debug.Log ("MARRIONETTE Condition (" + eventType.ToString() + "): " + mrntEvent);
+			UnityEngine.Debug.Log ("DING DATA Condition (" + adrs + "): " + val0);
 		}
 	}
 }

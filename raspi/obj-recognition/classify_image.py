@@ -48,6 +48,7 @@ from __future__ import print_function
 
 import argparse
 import os.path
+import os
 import re
 import sys
 import tarfile
@@ -221,6 +222,12 @@ def take_picture_handler(address, arg1):
     picture_being_taken = False
     print("picture ready")
 
+def speak(address, arg1):
+  os.system("pico2wave -w speaknow.wav '" + arg1 + "' && sox speaknow.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav" )
+  #os.system("flite -voice awb -t '" + arg1 + "'" )
+  #os.system("flite -t 'I am thinking about what you showed me...'" )
+  #pico2wave -w speaknow.wav "hello there!" && sox lookdave.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav
+
 def osc_loop():
   # runs as a thread waiting for incoming OSC messages
   # set up client
@@ -259,6 +266,9 @@ def main(_):
   while True:
     if picture_ready:
       print("analyzing...")
+      #os.system("echo %s | festival --tts" % "I am thinking about what you showed me...")
+      #os.system("flite -t 'click' " )
+      #os.system("echo %s | flite -t " % "I am thinking about what you showed me...")
       image = os.path.join(FLAGS.model_dir, 'object-image.jpg')
       match_results = run_inference_on_image(image)
       print(match_results)
@@ -278,7 +288,8 @@ if __name__ == '__main__':
   parser.add_argument(
       '--model_dir',
       type=str,
-      default='/tmp/imagenet',
+      #default='/tmp/imagenet',
+      default='/home/inception',
       help="""\
       Path to classify_image_graph_def.pb,
       imagenet_synset_to_human_label_map.txt, and
@@ -301,12 +312,13 @@ if __name__ == '__main__':
       '--server_ip',
       type=str,
       default='127.0.0.1',
-      help='IP of server to receive recognition results.'
+      help='IP of server to send recognition results to.'
   )
   FLAGS, unparsed = parser.parse_known_args()
   # set up handlers for incoming OSC messages
   dispatcher = dispatcher.Dispatcher()
   dispatcher.map("/ding2/recognize", take_picture_handler)
+  dispatcher.map("/ding2/speak", speak)
   dispatcher.map("/1/push*", take_picture_handler)
   # set up camera
   camera = picamera.PiCamera()

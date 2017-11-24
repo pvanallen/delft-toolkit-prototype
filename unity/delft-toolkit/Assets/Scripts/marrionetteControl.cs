@@ -53,48 +53,58 @@ public class marrionetteControl : MonoBehaviour {
 				if (item.Value.packets[lastPacketIndex].Data.Count > 0)
 				{
 					string address = item.Value.packets [lastPacketIndex].Address;
+					string sendMessage = "button" + address.Substring (7);
 					int arg1 = int.Parse(item.Value.packets[lastPacketIndex].Data[0].ToString());
 
-					address += " " + arg1;
-					switch (address) {
-					case "/1/push1 1":
+					if (address.StartsWith("/1/push") && arg1 == 1) {
 						if (MrntEvent != null)
-							MrntEvent ("button1");
-						break;
-					case "/1/push2 1":
-						if (MrntEvent != null)
-							MrntEvent ("button2");
-						break;
-					case "/1/push3 1":
-						if (MrntEvent != null)
-							MrntEvent ("button3");
-						break;
-					case "/1/push4 1":
-						if (MrntEvent != null)
-							MrntEvent ("button4");
-						break;
-					case "/1/push5 1":
-						if (MrntEvent != null)
-							MrntEvent ("button5");
-						break;
-					case "/1/push6 1":
-						if (MrntEvent != null)
-							MrntEvent ("button6");
-						break;
-					case "/1/push7 1":
-						if (MrntEvent != null)
-							MrntEvent ("button7");
-						break;
-					case "/1/push8 1":
-						if (MrntEvent != null)
-							MrntEvent ("button8");
-						break;
-					default:
-						print (OSC_SERVER_CLIENT + " default stop");
-						if (MrntEvent != null)
-							MrntEvent ("stop");
-						break;
+							MrntEvent (sendMessage);
 					}
+
+//					address += " " + arg1;
+//					switch (address) {
+//					case "/1/push1 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button1");
+//						break;
+//					case "/1/push2 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button2");
+//						break;
+//					case "/1/push3 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button3");
+//						break;
+//					case "/1/push4 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button4");
+//						break;
+//					case "/1/push5 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button5");
+//						break;
+//					case "/1/push6 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button6");
+//						break;
+//					case "/1/push7 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button7");
+//						break;
+//					case "/1/push8 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button8");
+//						break;
+//					case "/1/push9 1":
+//						if (MrntEvent != null)
+//							MrntEvent ("button9");
+//						break;
+//					default:
+//						print (OSC_SERVER_CLIENT + " default stop");
+//						if (MrntEvent != null)
+//							MrntEvent ("stop");
+//						break;
+//					}
 				}
 			}
 		}

@@ -11,8 +11,8 @@ public class dingSensors : MonoBehaviour {
 
 	private Dictionary<string, ServerLog> servers;
 
-	public delegate void DingDataEvent(string oscMessage, float val0, float val1, float val2);
-	public static event DingDataEvent DingEvent;
+	public delegate void DingNumberEvent(string oscMessage, float val0, float val1, float val2);
+	public static event DingNumberEvent DingNumEvent;
 
 	public delegate void DingStringEvent(string oscMessage, string val);
 	public static event DingStringEvent DingStrEvent;
@@ -57,13 +57,13 @@ public class dingSensors : MonoBehaviour {
 				for (int msgIndex = item.Value.packets.Count - msgsQd; msgIndex < item.Value.packets.Count; msgIndex++) {
 					//
 					string address = item.Value.packets [msgIndex].Address;
-					if (item.Value.packets [msgIndex].Address.StartsWith ("/analog/")) {
+					if (address.StartsWith ("/num/")) {
 						float value0 = item.Value.packets [msgIndex].Data.Count > 0 ? float.Parse (item.Value.packets [msgIndex].Data [0].ToString ()) : 0.0f;
 						float value1 = item.Value.packets [msgIndex].Data.Count > 1 ? float.Parse (item.Value.packets [msgIndex].Data [1].ToString ()) : 0.0f;
 						float value2 = item.Value.packets [msgIndex].Data.Count > 2 ? float.Parse (item.Value.packets [msgIndex].Data [2].ToString ()) : 0.0f;
-						if (DingEvent != null)
-							DingEvent (address, value0, value1, value2);
-					} else if (item.Value.packets [msgIndex].Address.StartsWith ("/string/")) {
+						if (DingNumEvent != null)
+							DingNumEvent (address, value0, value1, value2);
+					} else if (address.StartsWith ("/str/")) {
 						
 						string value = item.Value.packets [msgIndex].Data.Count > 0 ? item.Value.packets [msgIndex].Data [0].ToString () : "null";
 						print ("sending Event" + address + value);

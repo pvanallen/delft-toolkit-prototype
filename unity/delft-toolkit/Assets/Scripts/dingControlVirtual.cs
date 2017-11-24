@@ -6,29 +6,27 @@ public class dingControlVirtual : dingControlBase {
 
 	public override void Update () {
 		//base.Update ();
-		printNewMode ("DING-VIRTUAL", moveMode);
-		switch (moveMode) {
-		case "stop":
+		printNewMode ("DING-VIRTUAL", action);
+		switch (action) {
+		case aiGlobals.ActionTypes.stop:
 			break;
-		case "forward":
+		case aiGlobals.ActionTypes.forward:
 			transform.position += transform.forward * speed * Time.deltaTime;
 			break;
-		case "backward":
+		case aiGlobals.ActionTypes.backward:
 			transform.position -= transform.forward * speed * Time.deltaTime;
 			break;
-		case "turnRight":
+		case aiGlobals.ActionTypes.turnRight:
 			transform.Rotate(Vector3.up, 100f * Time.deltaTime);
 			break;
-		case "turnLeft":
+		case aiGlobals.ActionTypes.turnLeft:
 			transform.Rotate(Vector3.up, -1 * 100f * Time.deltaTime);
 			break;
-		case "ledsOn":
+		case aiGlobals.ActionTypes.ledsOn:
 			this.GetComponent<Renderer> ().material.color = new Color(0.236f, 0.0f, 0.5f);
 			break;
-		case "ledsOff":
+		case aiGlobals.ActionTypes.ledsOff:
 			this.GetComponent<Renderer> ().material.color = new Color(0.0f, 0.0f, 0.0f);
-			break;
-		case "":
 			break;
 		default:
 			break;

@@ -1,23 +1,27 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using NodeCanvas.Tasks.Actions;
 
 public class dingControlBase : MonoBehaviour {
 
 	public float speed = 1.0f; 
 
-	public string moveMode = "stop";
+	protected aiGlobals.Devices device;
+	protected aiGlobals.ActionTypes action = aiGlobals.ActionTypes.stop;
+	protected int param1;
+	protected string param2;
 
-	private string lastMode = "";
+	private aiGlobals.ActionTypes? lastAction = null;
 
 	void OnEnable()
 	{
-		simpleDispatcher.Move += setMove;
+		DingAction.DingEvent += setAction;
 	}
 		
 	void OnDisable()
 	{
-		simpleDispatcher.Move -= setMove;
+		DingAction.DingEvent -= setAction;
 	}
 
 	// Use this for initialization
@@ -30,19 +34,22 @@ public class dingControlBase : MonoBehaviour {
 		//printNewMode ("base", moveMode);
 	}
 
-	void setMove(string moveType) {
-		moveMode = moveType;
-		handleCommand (moveMode);
+	void setAction(aiGlobals.Devices aDevice, aiGlobals.ActionTypes anAction, int a, string b) {
+		device = aDevice;
+		action = anAction;
+		param1 = a;
+		param2 = b;
+		handleAction ();
 	}
 
-	public virtual void handleCommand (string command) {
+	public virtual void handleAction () {
 		// override in child
 	}
 
-	public void printNewMode(string receiver, string mode) {
-		if (mode != lastMode && mode != "") {
-			print (receiver + ": " + mode);
-			lastMode = mode;
+	public void printNewMode(string receiver, aiGlobals.ActionTypes newAction) {
+		if (newAction != lastAction) {
+			print (receiver + ": " + newAction.ToString());
+			lastAction = newAction;
 		}
 	}
 }

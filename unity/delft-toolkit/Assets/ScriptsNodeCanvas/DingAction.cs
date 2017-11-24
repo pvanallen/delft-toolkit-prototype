@@ -14,19 +14,23 @@ namespace NodeCanvas.Tasks.Actions{
 
 	public class DingAction : ActionTask<Transform> {
 
-		//public enum MovementTypes{stop, forward, backward, turnRight, turnLeft, ledsOn, ledsOff, servoWiggle, mlImuOff, mlImuRun, mlImuTrain1, mlImuTrain2, mlImuTrainStop, analogOff, analogOn0};
-		public aiGlobals.MovementTypes movementType = aiGlobals.MovementTypes.stop;
-
+		public aiGlobals.Devices device = aiGlobals.Devices.ding1;
+		public aiGlobals.ActionTypes actionType = aiGlobals.ActionTypes.stop;
+		public int parameter1 = 1;
+		//public string parameter2 = "Hello ";
+		public BBParameter<string> parameter2 = "Hello ";
+		public BBParameter<string> parameter3 = "world";
 //		[RequiredField]
 //		public BBParameter<float> speed = 2;
 		public BBParameter<float> actionSeconds = 1.0f;
+		public bool addOnParameter3 = false;
 		public bool waitActionFinish = true;
 		public bool stopAtFinish = true;
 
 		private bool started = false;
 
-		public delegate void BtEvent(string moveType);
-		public static event BtEvent BtMove;
+		public delegate void DingActionEvent(aiGlobals.Devices device, aiGlobals.ActionTypes action, int a, string b);
+		public static event DingActionEvent DingEvent;
 
 		protected override void OnUpdate() {
 			
@@ -42,24 +46,29 @@ namespace NodeCanvas.Tasks.Actions{
 		}
 
 		protected override void OnExecute() {
-			if (BtMove != null) {
-				BtMove (movementType.ToString());
+			if (DingEvent != null) {
+				string param2 = (string)parameter2.value;
+				if (addOnParameter3) {
+					string addOn = ((string)parameter3.value.Split ('/') [0]).Split(',')[1];
+					param2 += addOn;
+				}
+				DingEvent (device, actionType, parameter1, param2);
 			}
 		}
 
 		protected override string info{
-			get {return "Action: " + movementType.ToString();}
+			get {return "Action\n" + device.ToString() + "->" + actionType.ToString();}
 		}
 		protected override void OnStop() {
 			if (stopAtFinish) {
-				if (BtMove != null)
-					BtMove ("stop");
+				if (DingEvent != null)
+					DingEvent(device, aiGlobals.ActionTypes.stop, parameter1, parameter2.value);
 			}
 		}
 		protected override void OnPause() {
 			if (stopAtFinish) {
-				if (BtMove != null)
-					BtMove ("stop");
+				if (DingEvent != null)
+					DingEvent(device, aiGlobals.ActionTypes.stop, parameter1, parameter2.value);
 			}
 		}
 	}

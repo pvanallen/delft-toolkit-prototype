@@ -6,16 +6,21 @@ public class aiGlobals : MonoBehaviour {
 
 	public enum StringCompare
 	{
-		EqualTo,
 		Contains,
-		StartsWith
+		StartsWith,
+		EqualTo,
+		DoesNotContain
 	}
 
-	public enum MovementTypes{
+	public enum ActionTypes{
 		stop, forward, backward, turnRight, turnLeft, ledsOn, ledsOff, servoWiggle, 
 		mlImuOff, mlImuRun, mlImuTrain1, mlImuTrain2, mlImuTrainStop, 
 		analogOff, analogOn0,
-		recognize
+		recognize, speak
+	};
+
+	public enum Devices{
+		ding1, ding2, ding3
 	};
 
 
@@ -29,6 +34,9 @@ public class aiGlobals : MonoBehaviour {
 		if (cm == aiGlobals.StringCompare.StartsWith) {
 			return "StartsWith";
 		}
+		if (cm == aiGlobals.StringCompare.DoesNotContain) {
+			return "DoesNotContain";
+		}
 		return string.Empty;
 	}
 
@@ -41,6 +49,21 @@ public class aiGlobals : MonoBehaviour {
 		}
 		if (cm == aiGlobals.StringCompare.StartsWith) {
 			return a.ToLower().StartsWith(b.ToLower());
+		}
+		if (cm == aiGlobals.StringCompare.DoesNotContain) {
+			bool comparison = true;
+			if (b.Contains (",")) {
+				// check for multiple strings, all of which must not be in target
+				string[] theStrings = b.Split (',');
+				foreach (string token in theStrings) {
+					comparison = !(a.ToLower ().Contains (token.ToLower ()));
+					if (!comparison)
+						break;
+				}
+				return comparison;
+			} else {
+				return !a.ToLower ().Contains (b.ToLower ());
+			}
 		}
 		return false;
 	}

@@ -203,7 +203,7 @@ void transmitImu() {
       pixel.show();
       delay(20);
       for(int i=0; i<NUMPIXELS;i++){
-        pixel.setPixelColor(i, pixel.Color(255,255,255));
+        pixel.setPixelColor(i, pixel.Color(60,0,127));
       }
       pixel.show();
       delay(20);
@@ -213,7 +213,7 @@ void transmitImu() {
       pixel.show();
       delay(20);
       for(int i=0; i<NUMPIXELS;i++){
-        pixel.setPixelColor(i, pixel.Color(255,255,255));
+        pixel.setPixelColor(i, pixel.Color(60,0,127));
       }
       pixel.show();
     }

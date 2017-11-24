@@ -9,13 +9,15 @@ namespace NodeCanvas.Tasks.Conditions{
 	[Category(" DelftToolkit")]
 	public class MarrionetteEvent : ConditionTask{
 
-		public enum EventTypes{button1, button2, button3, button4, button5, button6, button7, button8};
+		public enum EventTypes{button1, button2, button3, button4, button5, button6, button7, button8, button9};
 		public EventTypes eventType = EventTypes.button1;
 		public bool toggleState = false;
 
 		public int eventValue = 0;
 
-		private bool eventCheck = false;
+		private bool toggleValue = false;
+		private string savedEvent = "";
+
 
 		protected override string OnInit() {
 			//UnityEngine.Debug.Log ("marrionette INIT");
@@ -33,24 +35,23 @@ namespace NodeCanvas.Tasks.Conditions{
 		}
 
 		protected override bool OnCheck(){
-			if (eventCheck)
-				return true;
-
-			return false;
+			bool eventCheck = false;
+			if (toggleState) {
+				if (savedEvent == eventType.ToString ()) {
+					toggleValue = !toggleValue;
+					eventCheck = toggleValue;
+				}
+			} else {
+				if (savedEvent == eventType.ToString ())
+					eventCheck = true;
+			}
+			// so we only process incoming event once
+			savedEvent = "";
+			return eventCheck;
 		}
 
 		void setEvent(string mrntEvent) {
-			if (toggleState) {
-				if (mrntEvent == eventType.ToString ()) {
-					eventCheck = !eventCheck;
-				}
-			} else {
-				eventCheck = false;
-				if (mrntEvent == eventType.ToString ())
-					eventCheck = true;
-			}
-	
-			//UnityEngine.Debug.Log ("MARRIONETTE Condition (" + eventType.ToString() + "): " + mrntEvent);
+			savedEvent = mrntEvent;
 		}
 	}
 }

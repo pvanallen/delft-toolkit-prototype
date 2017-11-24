@@ -46,7 +46,7 @@ var toCtrl = new osc.Client('127.0.0.1', 8001); // send to Unity
 var fromCtrl = new osc.Server(3333, '0.0.0.0'); // receive from Unity
 
 //var toPi = new osc.Client('145.94.216.183', 5005); // send to RasPi
-var toPi = new osc.Client('169.254.217.233', 5005); // send to RasPi
+var toPi = new osc.Client('145.94.217.178', 5005); // send to RasPi
 var fromPi = new osc.Server(5006, '0.0.0.0'); // receive from RasPi
 
 console.log("start training on saved data...");
@@ -62,7 +62,7 @@ fromPi.on("message", function (msg, rinfo) {
       console.log(msg[1]);
       // SEND BY OSC TO UNITY
       var ctrlMessageStr = "";
-      ctrlMessageStr = "/string/objIdent";
+      ctrlMessageStr = "/str/ding2/objIdent";
       var ctrlMessage = new osc.Message(ctrlMessageStr);
       ctrlMessage.append(msg[1]);
       toCtrl.send(ctrlMessage);
@@ -136,9 +136,9 @@ noble.on('discover', function(peripheral) {
           // SEND BY OSC TO UNITY
           var ctrlMessageStr = "";
           if (type == "A") {
-            ctrlMessageStr = "/analog/" + port;
+            ctrlMessageStr = "/num/ding1/a/" + port;
           } else {
-            ctrlMessageStr = "/generic/" + port;
+            ctrlMessageStr = "/num/ding1/other/" + port;
           }
           var ctrlMessage = new osc.Message(ctrlMessageStr);
           ctrlMessage.append(v1);
@@ -245,16 +245,25 @@ noble.on('discover', function(peripheral) {
                 commandCharacteristic.write(bufferToSend, false);
               } else if (msg[0].indexOf("/ding2/") >=0) {
                 // send to raspberry pi
+                var validMsg = true;
                 var ctrlMessage = new osc.Message(msg[0]);
                 switch(msg[0]) {
                   case "/ding2/recognize":
                     ctrlMessage.append(msg[1]);
                     break;
+                  case "/ding2/speak":
+                    ctrlMessage.append(msg[2]);
+                    console.log("message: " + msg)
+                    break;
                   default:
                     console.log("unknown message: " + msg)
+                    validMsg = false;
                     break;
                 }
-                toPi.send(ctrlMessage);
+                if (validMsg) {
+                  console.log("SENDING TO PI: " + msg[0]);
+                  toPi.send(ctrlMessage);
+                }
               }
 
         });
@@ -269,16 +278,16 @@ function mlEvaluate() {
     console.log("testSet: " + testSet.length);
     console.log("run");
     // pad with zeros to make 128 to work around rapidmix bug
-    for (var i=testSet.length; i<128; i++) {
-      var rapidInput = [0.0,0.0,0.0];
-      testSet.push(rapidInput);
-    }
+    // for (var i=testSet.length; i<128; i++) {
+    //   var rapidInput = [0.0,0.0,0.0];
+    //   testSet.push(rapidInput);
+    // }
     console.log("testSet: " + testSet.length);
     match = myDTW.run(testSet);
     console.log("getCosts");
     costs = myDTW.getCosts();
 
-    var ctrlMessageStr = "/ml/imucat";
+    var ctrlMessageStr = "/num/ding1/category";
     var ctrlMessage = new osc.Message(ctrlMessageStr);
 
     var gestureCategory = parseFloat(match.replace(/\D/g,''));

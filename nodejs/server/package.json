@@ -19,6 +19,6 @@
   "dependencies": {
     "noble": "^1.8.0",
     "node-osc": "^2.1.0",
-    "rapidlib": "^1.0.5"
+    "rapidlib": "^1.0.7"
   }
 }
