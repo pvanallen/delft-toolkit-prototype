@@ -53,17 +53,20 @@ console.log("start training on saved data...");
 var trainingComplete = false;
 readFeaturesTrain(); // async
 
-// set up for communication with RasPi
+// receiving OSC from RasPi
 fromPi.on("message", function (msg, rinfo) {
   console.log("Incoming Pi OSC msg: " + msg);
   // send to Unity
   switch(msg[0]) {
     case "/ding2/objIdent":
       console.log(msg[1]);
-      // SEND BY OSC TO UNITY
-      var ctrlMessageStr = "";
-      ctrlMessageStr = "/str/ding2/objIdent";
-      var ctrlMessage = new osc.Message(ctrlMessageStr);
+      var ctrlMessage = new osc.Message("/str/ding2/objIdent");
+      ctrlMessage.append(msg[1]);
+      toCtrl.send(ctrlMessage);
+      break;
+    case "/ding2/speech2text":
+      console.log(msg[1]);
+      var ctrlMessage = new osc.Message("/str/ding2/speech2text");
       ctrlMessage.append(msg[1]);
       toCtrl.send(ctrlMessage);
       break;
@@ -253,6 +256,10 @@ noble.on('discover', function(peripheral) {
                     break;
                   case "/ding2/speak":
                     ctrlMessage.append(msg[2]);
+                    console.log("message: " + msg)
+                    break;
+                  case "/ding2/listen":
+                    ctrlMessage.append(msg[1]);
                     console.log("message: " + msg)
                     break;
                   default:

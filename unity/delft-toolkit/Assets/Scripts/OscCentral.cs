@@ -60,7 +60,7 @@ public class OscCentral : MonoBehaviour {
 
 				// print the queued messages
 				for (int msgIndex = item.Value.packets.Count - msgsQd; msgIndex < item.Value.packets.Count; msgIndex++) {
-					if (!item.Value.packets [msgIndex].Address.StartsWith("/analog/")) {
+					if (!item.Value.packets [msgIndex].Address.StartsWith("/num/ding1")) { // avoid logging fast sensor updates
 						UnityEngine.Debug.Log (String.Format ("OSC RECEIVED: {0} Address: {1} {2} {3} {4}",
 							item.Key, // Server name
 							item.Value.packets [msgIndex].Address, // OSC address

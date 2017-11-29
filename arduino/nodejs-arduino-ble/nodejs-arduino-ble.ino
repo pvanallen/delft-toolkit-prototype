@@ -91,7 +91,7 @@ void setup() {
 
   // Setup the neopixel
   pixel.begin();
-  pixel.setBrightness(128); //medium brightness
+  pixel.setBrightness(90); //medium brightness
   pixel.show();
 
 

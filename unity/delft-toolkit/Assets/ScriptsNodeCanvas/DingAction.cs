@@ -24,6 +24,7 @@ namespace NodeCanvas.Tasks.Actions{
 //		public BBParameter<float> speed = 2;
 		public BBParameter<float> actionSeconds = 1.0f;
 		public bool addOnParameter3 = false;
+		public bool parseParam3Ident = false;
 		public bool waitActionFinish = true;
 		public bool stopAtFinish = true;
 
@@ -47,10 +48,13 @@ namespace NodeCanvas.Tasks.Actions{
 
 		protected override void OnExecute() {
 			if (DingEvent != null) {
-				string param2 = (string)parameter2.value;
+				string param2 = ((string)parameter2.value).Replace("'","");
 				if (addOnParameter3) {
-					string addOn = ((string)parameter3.value.Split ('/') [0]).Split(',')[1];
-					param2 += addOn;
+					if (parseParam3Ident) {
+						param2 += ((string)parameter3.value.Split ('/') [0]).Split (',') [1];
+					} else {
+						param2 += (string)parameter3.value;
+					}
 				}
 				DingEvent (device, actionType, parameter1, param2);
 			}

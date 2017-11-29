@@ -16,7 +16,7 @@ public class aiGlobals : MonoBehaviour {
 		stop, forward, backward, turnRight, turnLeft, ledsOn, ledsOff, servoWiggle, 
 		mlImuOff, mlImuRun, mlImuTrain1, mlImuTrain2, mlImuTrainStop, 
 		analogOff, analogOn0,
-		recognize, speak
+		recognize, speak, listen
 	};
 
 	public enum Devices{
@@ -45,7 +45,20 @@ public class aiGlobals : MonoBehaviour {
 			return a.ToLower() == b.ToLower();
 		} 
 		if (cm == aiGlobals.StringCompare.Contains) {
-			return a.ToLower().Contains(b.ToLower());
+			//return a.ToLower().Contains(b.ToLower());
+			bool comparison = false;
+			if (b.Contains (",")) {
+				// check for multiple strings, any of which must be in target
+				string[] theStrings = b.Split (',');
+				foreach (string token in theStrings) {
+					comparison = a.ToLower ().Contains (token.ToLower ());
+					if (comparison)
+						break;
+				}
+				return comparison;
+			} else {
+				return a.ToLower ().Contains (b.ToLower ());
+			}
 		}
 		if (cm == aiGlobals.StringCompare.StartsWith) {
 			return a.ToLower().StartsWith(b.ToLower());

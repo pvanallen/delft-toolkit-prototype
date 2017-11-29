@@ -67,6 +67,20 @@ from pythonosc import udp_client
 from threading import Thread
 import socket
 
+# speech to text
+import sys
+import json
+import urllib
+import subprocess
+import pycurl
+#import StringIO
+from io import BytesIO
+import os.path
+import base64
+import time
+import RPi.GPIO as GPIO
+import subprocess
+from subprocess import Popen, PIPE, STDOUT
 
 FLAGS = None
 
@@ -209,7 +223,7 @@ def maybe_download_and_extract():
     print('Successfully downloaded', filename, statinfo.st_size, 'bytes.')
   tarfile.open(filepath, 'r:gz').extractall(dest_directory)
 
-def take_picture_handler(address, arg1):
+def take_picture_recognize(address, arg1):
   global picture_ready
   global picture_being_taken
   # take and write a snapshot to a file
@@ -227,6 +241,149 @@ def speak(address, arg1):
   #os.system("flite -voice awb -t '" + arg1 + "'" )
   #os.system("flite -t 'I am thinking about what you showed me...'" )
   #pico2wave -w speaknow.wav "hello there!" && sox lookdave.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav
+
+def isAudioPlaying():
+
+  audioPlaying = False
+
+  #Check processes using ps
+  #---------------------------------------
+  cmd = 'ps -C omxplayer,mplayer'
+  lineCounter = 0
+  p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+  for ln in p.stdout:
+    lineCounter = lineCounter + 1
+    if lineCounter > 1:
+      audioPlaying = True
+      break
+
+  return audioPlaying ;
+
+
+def speech2text(duration):
+
+  key = 'AIzaSyCWsDZ6eZlqfyZtj-vV8ukDl_rxtsprSDI'
+  stt_url = 'https://speech.googleapis.com/v1beta1/speech:syncrecognize?key=' + key
+  filename = 'speech2text.flac'
+
+  #Do nothing if audio is playing
+  #------------------------------------
+  if isAudioPlaying():
+    print (time.strftime("%Y-%m-%d %H:%M:%S ") + "Audio is playing")
+    return ""
+
+
+
+  #Record sound
+  #----------------
+  print ("listening for " + str(duration) + " seconds...")
+  os.system('arecord -D plughw:1 -f cd -c 1 -t wav -d ' + str(duration) + '  -q -r 16000 | flac - -s -f --best -o ' + filename)
+
+
+  #Check if the amplitude is high enough
+  #---------------------------------------
+  cmd = 'sox ' + filename + ' -n stat'
+  p = Popen(cmd, shell=True, stdin=PIPE, stdout=PIPE, stderr=STDOUT, close_fds=True)
+  soxOutput = p.stdout.read()
+  #print "Popen output" + soxOutput
+
+
+  maxAmpStart = soxOutput.find(b"Maximum amplitude")+24
+  maxAmpEnd = maxAmpStart + 7
+
+  #print "Max Amp Start: " + str(maxAmpStart)
+  #print "Max Amop Endp: " + str(maxAmpEnd)
+
+  maxAmpValueText = soxOutput[maxAmpStart:maxAmpEnd]
+
+
+  #print "Max Amp: " + maxAmpValueText
+
+  maxAmpValue = float(maxAmpValueText)
+
+  if maxAmpValue < 0.1 :
+    print ("Audio too quiet, not sending to Google")
+    #Exit if sound below minimum amplitude
+    return ""
+
+
+  #Send sound  to Google Cloud Speech Api to interpret
+  #----------------------------------------------------
+
+  print (time.strftime("%Y-%m-%d %H:%M:%S ")  + "Sending to google api")
+
+
+    # send the file to google speech api
+  c = pycurl.Curl()
+  c.setopt(pycurl.VERBOSE, 0)
+  c.setopt(pycurl.URL, stt_url)
+  fout = BytesIO()
+  c.setopt(pycurl.WRITEFUNCTION, fout.write)
+
+  c.setopt(pycurl.POST, 1)
+  c.setopt(pycurl.HTTPHEADER, ['Content-Type: application/json'])
+
+  with open(filename, 'rb') as speech:
+    # Base64 encode the binary audio file for inclusion in the JSON
+          # request.
+          speech_content = base64.b64encode(speech.read())
+
+  jsonContentTemplate = """{
+      'config': {
+            'encoding':'FLAC',
+            'sampleRate': 16000,
+            'languageCode': 'en-GB',
+      'speechContext': {
+            'phrases': [
+              'jarvis'
+          ],
+        },
+      },
+      'audio': {
+          'content':'XXX'
+      }
+  }"""
+
+
+  jsonContent = jsonContentTemplate.replace("XXX",speech_content.decode("utf-8"))
+
+  #print jsonContent
+
+  start = time.time()
+
+  c.setopt(pycurl.POSTFIELDS, jsonContent)
+  c.perform()
+
+
+  #Extract text from returned message from Google
+  #----------------------------------------------
+  response_data = fout.getvalue()
+
+
+  end = time.time()
+  #print "Time to run:"
+  #print(end - start)
+
+
+  #print response_data
+
+  c.close()
+
+  start_loc = response_data.find(b"transcript")
+  temp_str = response_data[start_loc + 14:]
+  #print "temp_str: " + temp_str
+  end_loc = temp_str.find(b"\""+b",")
+  final_result = temp_str[:end_loc]
+  print (time.strftime("%Y-%m-%d %H:%M:%S ") + " transcription: " + final_result.decode("utf-8"))
+  return final_result.decode("utf-8")
+
+def listen_speech2text(address, duration):
+  text  = speech2text(duration).replace("'","")
+  if (text != ""):
+    client.send_message("/ding2/speech2text", text)
+  else:
+    print("no transcription")
+    client.send_message("/ding2/speech2text", "notranscription")
 
 def osc_loop():
   # runs as a thread waiting for incoming OSC messages
@@ -264,6 +421,7 @@ def main(_):
   server_thread.start() # run in background as a thread
 
   while True:
+
     if picture_ready:
       print("analyzing...")
       #os.system("echo %s | festival --tts" % "I am thinking about what you showed me...")
@@ -274,7 +432,7 @@ def main(_):
       print(match_results)
       client.send_message("/ding2/objIdent", match_results)
       picture_ready = False
-      time.sleep(0.1)
+    time.sleep(0.1)
 
 
 if __name__ == '__main__':
@@ -317,9 +475,10 @@ if __name__ == '__main__':
   FLAGS, unparsed = parser.parse_known_args()
   # set up handlers for incoming OSC messages
   dispatcher = dispatcher.Dispatcher()
-  dispatcher.map("/ding2/recognize", take_picture_handler)
+  dispatcher.map("/ding2/recognize", take_picture_recognize)
   dispatcher.map("/ding2/speak", speak)
-  dispatcher.map("/1/push*", take_picture_handler)
+  dispatcher.map("/ding2/listen", listen_speech2text)
+  dispatcher.map("/1/push*", take_picture_recognize)
   # set up camera
   camera = picamera.PiCamera()
   picture_ready = False

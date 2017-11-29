@@ -9,7 +9,7 @@ namespace NodeCanvas.Tasks.Conditions{
 	[Category(" DelftToolkit")]
 	public class MarrionetteEvent : ConditionTask{
 
-		public enum EventTypes{button1, button2, button3, button4, button5, button6, button7, button8, button9};
+		public enum EventTypes{button1, button2, button3, button4, button5, button6, button7, button8, button9, button10};
 		public EventTypes eventType = EventTypes.button1;
 		public bool toggleState = false;
 

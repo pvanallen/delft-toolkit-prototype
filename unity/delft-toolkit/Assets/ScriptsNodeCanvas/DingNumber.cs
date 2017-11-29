@@ -33,6 +33,7 @@ namespace NodeCanvas.Tasks.Conditions{
 				incomingDingMessage = "";
 				return OperationTools.Compare ((float)value0, (float)valueB.value, checkType, differenceThreshold);
 			} else {
+				incomingDingMessage = "";
 				return false;
 			}
 		}
