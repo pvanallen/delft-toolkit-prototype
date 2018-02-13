@@ -1,9 +1,11 @@
 # Delft AI Toolkit
 ## Visual Authoring Toolkit for Smart Things
 
-The Delft Toolkit a system for designing smart things. It incorporates machine learning and behavior trees to create smart behavior, all in a visual authoring environment.
+The Delft Toolkit a system for designing smart things. It provides a visual authoring environment that incorporates machine learning and behavior trees to create smart behavior in autonomous devices.
 
-The toolkit is currently in rough prototype form as a part of my research. _It is rapid development, and likely to change significantly as I form a technical and design strategy._
+![system diagram](https://i0.wp.com/www.philvanallen.com/wp-content/uploads/2018/01/Pasted_Image_1_16_18__3_50_PM.jpg?resize=640%2C350)
+
+The toolkit is currently in rough prototype form as a part of my research. **It is likely to change significantly as I iteratively develop a technical and design strategy.**
 
 The goal of this project is to develop an authoring system approach that enables designers to easily and iteratively prototype smart things. This approach includes the ability to Wizard-of-Oz AI behaviors and simulate physical hardware in 3D, and then migrate these simulations to working prototypes that use machine learning and real hardware.
 
