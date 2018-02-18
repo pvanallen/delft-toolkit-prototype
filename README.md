@@ -22,3 +22,5 @@ The system currently has two parts:
   * Motors, sensors, microphone, camera, etc.
 
 Each of these has a codebase, and includes a range of libraries. In particular, the Unity system is based on the [NodeCanvas](http://nodecanvas.paradoxnotion.com) paid asset for Unity3D, and provides the foundation for the visual authoring of behavior trees. My hope is to eventually make this part of the system free in some way.
+
+![detailed diagram](http://www.philvanallen.com/wp-content/uploads/2017/08/tool-architecture-diagram.002.jpeg)
