@@ -27,15 +27,15 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
 
 ## Starting the system
 1. **Power robot**: Power on the Arduino and Raspberry Pi (RPi)
-  * **Adapters**:
-    * **Arduino**: Connect a USB cable from computer to Arduino
-    * **RPi**: Connect a wall power adapter to the micro-usb connector
-  * **Batteries**:
-    * **Arduino**: Turn on the 9V battery
-    * **Motors**: Turn on the AA battery pack
-    * **RPi**: Connect the fast charging USB battery to the micro USB connector
+   * **Adapters**:
+     * **Arduino**: Connect a USB cable from computer to Arduino
+     * **RPi**: Connect a wall power adapter to the micro-usb connector
+   * **Batteries**:
+     * **Arduino**: Turn on the 9V battery
+     * **Motors**: Turn on the AA battery pack
+     * **RPi**: Connect the fast charging USB battery to the micro USB connector
 1. **Login to RPi**: Open a terminal app on your computer and login to the RPi by typing:
-  1. **ssh pi@delftbt0.local** (change the last digit to match your setup)
+   * **ssh pi@delftbt0.local** (change the last digit to match your setup)
 1. **Get IP addresses**:
   1. Computer
     1. **Mac**: Hold the option key down, and click on your Wifi toolbar icon.
