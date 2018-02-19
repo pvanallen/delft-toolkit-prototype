@@ -15,7 +15,7 @@ public class aiGlobals : MonoBehaviour {
 	public enum ActionTypes{
 		stop, forward, backward, turnRight, turnLeft, ledsOn, ledsOff, servoWiggle, 
 		mlImuOff, mlImuRun, mlImuTrain1, mlImuTrain2, mlImuTrainStop, 
-		analogOff, analogOn0,
+		analogOff, analogOn,
 		recognize, speak, listen
 	};
 

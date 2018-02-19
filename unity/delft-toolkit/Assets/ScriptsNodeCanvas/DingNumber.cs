@@ -50,7 +50,11 @@ namespace NodeCanvas.Tasks.Conditions{
 
 		void handleEvent(string adrs, float val0, float val1, float val2) {
 			incomingDingMessage = adrs;
-			value0 = val0;
+			if (incomingDingMessage == "/num" + matchDingMessage) {
+				value0 = val0;
+			} else {
+				value0 = 0;
+			}
 			UnityEngine.Debug.Log ("DING DATA Condition (" + adrs + "): " + val0);
 		}
 	}
