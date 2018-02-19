@@ -6,6 +6,7 @@
 //
 // some code adapted from https://github.com/virgilvox/curie-ble-example-js/
 //
+const args = process.argv;
 
 var noble = require('noble');
 var osc = require('node-osc');
@@ -45,9 +46,24 @@ var costs = [-1, -1];
 var toCtrl = new osc.Client('127.0.0.1', 8001); // send to Unity
 var fromCtrl = new osc.Server(3333, '0.0.0.0'); // receive from Unity
 
-//var toPi = new osc.Client('145.94.216.183', 5005); // send to RasPi
-var toPi = new osc.Client('145.94.217.178', 5005); // send to RasPi
+// conect to RasPi
+if (args.length < 3) {
+  console.log("Please specify the IP of the RasPi, e.g. node hub 10.0.1.10 DelftBot0");
+  process.exit(-1);
+}
+var piIp = args[2];
+console.log("connect to Raspbery Pi @ " + piIp);
+
+var toPi = new osc.Client(piIp, 5005); // send to RasPi
 var fromPi = new osc.Server(5006, '0.0.0.0'); // receive from RasPi
+
+// Arduino config
+if (args.length < 4) {
+  console.log("Please specify the BLE local name of the Arduino, e.g. node hub 10.0.1.10 DelftBot0");
+  process.exit(-1);
+}
+var bleArduinoName = args[3];
+console.log("connect to Arduino named " +  bleArduinoName);
 
 console.log("start training on saved data...");
 var trainingComplete = false;
@@ -80,8 +96,8 @@ fromPi.on("message", function (msg, rinfo) {
 // setup for bluetooth
 // Search only for the Service UUID of the device (remove dashes)
 var serviceUuids = ['20B10010E8F2537E4F6CD104768A1214'];
-
-// Search only for the led charateristic
+var allowDuplicates = true;
+// Search only for the Characteristics
 var characteristicUuids = [
   '19B10011E8F2537E4F6CD104768A1214',
   '5667f3b1d6a24fb2a9174bee580a9c84',
@@ -91,7 +107,7 @@ var characteristicUuids = [
 // start scanning when internal bluetooth is powered on
 noble.on('stateChange', function(state) {
   if (state === 'poweredOn') {
-    noble.startScanning(serviceUuids);
+    noble.startScanning(serviceUuids, allowDuplicates);
   } else {
     noble.stopScanning();
   }
@@ -99,184 +115,195 @@ noble.on('stateChange', function(state) {
 
 // Search for BLE peripherals
 noble.on('discover', function(peripheral) {
-  peripheral.connect(function(error) {
-    console.log('connected to peripheral: ' + peripheral.uuid);
-    // Only discover the service we specified above
-    peripheral.discoverServices(serviceUuids, function(error, services) {
-      var service = services[0];
-      console.log('discovered robot service');
+  displayPeripheral(peripheral);
+  var advertisement = peripheral.advertisement;
+  var localName = advertisement.localName;
+  console.log("Found: " + localName);
+  if (localName !== bleArduinoName) {
+    console.log("Ignoring...")
+  } else {
+    noble.stopScanning();
+    console.log("Connecting to " + localName + "...");
+    peripheral.connect(function(error) {
+      console.log('connected to peripheral: ' + peripheral.uuid + " " + peripheral.advertisement.localName);
+      // Only discover the service we specified above
 
-      service.discoverCharacteristics(characteristicUuids, function(error, characteristics) {
-        console.log('discovered robot characteristics');
-        // Assign Characteristics
-        var commandCharacteristic = characteristics[0];
-        var imuCharacteristic = characteristics[1];
-        var sensorCharacteristic = characteristics[2];
+      peripheral.discoverServices(serviceUuids, function(error, services) {
+        var service = services[0];
+        console.log('discovered robot service');
 
-        // SUBSCRIBE TO AND HANDLE IMU MESSAGES FROM ARDUINO
-        //
-        imuCharacteristic.subscribe(function(error) {
-          console.log("subscribed to imu")
-          if(error) console.log(error);
-        });
+        service.discoverCharacteristics(characteristicUuids, function(error, characteristics) {
+          console.log('discovered robot characteristics');
+          // Assign Characteristics
+          var commandCharacteristic = characteristics[0];
+          var imuCharacteristic = characteristics[1];
+          var sensorCharacteristic = characteristics[2];
 
-        // BUILD DATA FROM IMU, PROCESS, AND CLASSIFY OR TRAIN
-        imuCharacteristic.on('data', handleImu);
+          // SUBSCRIBE TO AND HANDLE IMU MESSAGES FROM ARDUINO
+          //
+          imuCharacteristic.subscribe(function(error) {
+            console.log("subscribed to imu")
+            if(error) console.log(error);
+          });
 
-        // SUBSCRIBE TO AND HANDLE DATA FROM SENSORS ON ARDUINO
-        //
-        sensorCharacteristic.subscribe(function(error) {
-          console.log("subscribed to sensors")
-          if(error) console.log(error);
-        });
-        sensorCharacteristic.on('data', function(data, isNotification) {
-          var type = String.fromCharCode(data.readInt8(0));
-          var port = data.readInt8(1);
-          var v1 = data.readFloatLE(4);
-          var v2 = data.readFloatLE(8);
-          var v3 = data.readFloatLE(12);
+          // BUILD DATA FROM IMU, PROCESS, AND CLASSIFY OR TRAIN
+          imuCharacteristic.on('data', handleImu);
 
-          // SEND BY OSC TO UNITY
-          var ctrlMessageStr = "";
-          if (type == "A") {
-            ctrlMessageStr = "/num/ding1/a/" + port;
-          } else {
-            ctrlMessageStr = "/num/ding1/other/" + port;
-          }
-          var ctrlMessage = new osc.Message(ctrlMessageStr);
-          ctrlMessage.append(v1);
-          ctrlMessage.append(v2);
-          ctrlMessage.append(v3);
-          toCtrl.send(ctrlMessage);
+          // SUBSCRIBE TO AND HANDLE DATA FROM SENSORS ON ARDUINO
+          //
+          sensorCharacteristic.subscribe(function(error) {
+            console.log("subscribed to sensors")
+            if(error) console.log(error);
+          });
+          sensorCharacteristic.on('data', function(data, isNotification) {
+            var type = String.fromCharCode(data.readInt8(0));
+            var port = data.readInt8(1);
+            var v1 = data.readFloatLE(4);
+            var v2 = data.readFloatLE(8);
+            var v3 = data.readFloatLE(12);
 
-          //console.log("sensor: " + type + " " + port + " " + v1 + "," + v2 + "," + v3);
-        });
+            // SEND BY OSC TO UNITY
+            var ctrlMessageStr = "";
+            if (type == "A") {
+              ctrlMessageStr = "/num/ding1/a/" + port;
+            } else {
+              ctrlMessageStr = "/num/ding1/other/" + port;
+            }
+            var ctrlMessage = new osc.Message(ctrlMessageStr);
+            ctrlMessage.append(v1);
+            ctrlMessage.append(v2);
+            ctrlMessage.append(v3);
+            toCtrl.send(ctrlMessage);
 
-        // HANDLE MESSAGES FROM UNITY AND FORWARD TO ARDUINO
-        //
-        var bufferToSend = new Buffer.alloc(16);
-        var motorOn = false;
+            //console.log("sensor: " + type + " " + port + " " + v1 + "," + v2 + "," + v3);
+          });
 
-        fromCtrl.on("message", function (msg, rinfo) {
+          // HANDLE MESSAGES FROM UNITY AND FORWARD TO ARDUINO
+          //
+          var bufferToSend = new Buffer.alloc(16);
+          var motorOn = false;
 
-              if (msg[0].indexOf("/robot/") >=0) {
-                // send to robot
-                console.log("Incoming OSC msg: " + msg);
-                bufferToSend.writeUInt8(0,1);
-                bufferToSend.writeUInt8(0,2);
-                bufferToSend.writeUInt8(0,3);
+          fromCtrl.on("message", function (msg, rinfo) {
 
-                // send bluetooth commands based on OSC message
-                switch(msg[0]) {
-                  // wheel motor commands
-                  case "/robot/stop":
-                    bufferToSend.write("M",0);
-                    bufferToSend.writeUInt8(0,1);
-                    break;
-                  case "/robot/forward":
-                    bufferToSend.write("M",0);
-                    bufferToSend.writeUInt8(1,1);
-                    break;
-                  case "/robot/backward":
-                    bufferToSend.write("M",0);
-                    bufferToSend.writeUInt8(2,1);
-                    break;
-                  case "/robot/turnRight":
-                    bufferToSend.write("M",0);
-                    bufferToSend.writeUInt8(3,1);
-                    break;
-                  case "/robot/turnLeft":
-                    bufferToSend.write("M",0);
-                    bufferToSend.writeUInt8(4,1);
-                    break;
-                  // LED commands
-                  case "/robot/ledsOn":
-                    bufferToSend.write("C",0);
-                    bufferToSend.writeUInt8(60,1);
-                    bufferToSend.writeUInt8(0,2);
-                    bufferToSend.writeUInt8(127,3);
-                    break;
-                  case "/robot/ledsOff":
-                    bufferToSend.write("C",0);
-                    bufferToSend.writeUInt8(0,1);
-                    bufferToSend.writeUInt8(0,2);
-                    bufferToSend.writeUInt8(0,3);
-                    break;
-                  // servo commands
-                  case "/robot/servoWiggle":
-                    bufferToSend.write("S",0);
-                    break;
-                  // machine learning/imu commands
-                  case "/robot/mlImuOff":
-                    bufferToSend.write("L",0);
-                    bufferToSend.writeUInt8(0,1);
-                    break;
-                  case "/robot/mlImuRun":
-                      bufferToSend.write("L",0);
-                      bufferToSend.writeUInt8(1,1);
-                      break;
-                  case "/robot/mlImuTrain1":
-                      bufferToSend.write("L",0);
-                      bufferToSend.writeUInt8(2,1);
-                      bufferToSend.writeUInt8(1,2);
-                      break;
-                  case "/robot/mlImuTrain2":
-                      bufferToSend.write("L",0);
-                      bufferToSend.writeUInt8(2,1);
-                      bufferToSend.writeUInt8(2,2);
-                      break;
-                  case "/robot/mlImuTrainStop":
-                      bufferToSend.write("L",0);
-                      bufferToSend.writeUInt8(0,1);
-                      readFeaturesTrain();
-                      break;
-                  // analog inputs
-                  case "/robot/analogOff":
-                      bufferToSend.write("A",0);
-                      bufferToSend.writeUInt8(0,1);
-                      break;
-                  case "/robot/analogOn0":
-                      bufferToSend.write("A",0);
-                      bufferToSend.writeUInt8(1,1);
-                      bufferToSend.writeUInt8(0,2);
-                      break;
-                  default:
+                if (msg[0].indexOf("/robot/") >=0) {
+                  // send to robot
+                  console.log("Incoming OSC msg: " + msg);
+                  bufferToSend.writeUInt8(0,1);
+                  bufferToSend.writeUInt8(0,2);
+                  bufferToSend.writeUInt8(0,3);
+
+                  // send bluetooth commands based on OSC message
+                  switch(msg[0]) {
+                    // wheel motor commands
+                    case "/robot/stop":
                       bufferToSend.write("M",0);
+                      bufferToSend.writeUInt8(0,1);
+                      break;
+                    case "/robot/forward":
+                      bufferToSend.write("M",0);
+                      bufferToSend.writeUInt8(1,1);
+                      break;
+                    case "/robot/backward":
+                      bufferToSend.write("M",0);
+                      bufferToSend.writeUInt8(2,1);
+                      break;
+                    case "/robot/turnRight":
+                      bufferToSend.write("M",0);
+                      bufferToSend.writeUInt8(3,1);
+                      break;
+                    case "/robot/turnLeft":
+                      bufferToSend.write("M",0);
+                      bufferToSend.writeUInt8(4,1);
+                      break;
+                    // LED commands
+                    case "/robot/ledsOn":
+                      bufferToSend.write("C",0);
+                      bufferToSend.writeUInt8(60,1);
+                      bufferToSend.writeUInt8(0,2);
+                      bufferToSend.writeUInt8(127,3);
+                      break;
+                    case "/robot/ledsOff":
+                      bufferToSend.write("C",0);
+                      bufferToSend.writeUInt8(0,1);
+                      bufferToSend.writeUInt8(0,2);
+                      bufferToSend.writeUInt8(0,3);
+                      break;
+                    // servo commands
+                    case "/robot/servoWiggle":
+                      bufferToSend.write("S",0);
+                      break;
+                    // machine learning/imu commands
+                    case "/robot/mlImuOff":
+                      bufferToSend.write("L",0);
+                      bufferToSend.writeUInt8(0,1);
+                      break;
+                    case "/robot/mlImuRun":
+                        bufferToSend.write("L",0);
+                        bufferToSend.writeUInt8(1,1);
+                        break;
+                    case "/robot/mlImuTrain1":
+                        bufferToSend.write("L",0);
+                        bufferToSend.writeUInt8(2,1);
+                        bufferToSend.writeUInt8(1,2);
+                        break;
+                    case "/robot/mlImuTrain2":
+                        bufferToSend.write("L",0);
+                        bufferToSend.writeUInt8(2,1);
+                        bufferToSend.writeUInt8(2,2);
+                        break;
+                    case "/robot/mlImuTrainStop":
+                        bufferToSend.write("L",0);
+                        bufferToSend.writeUInt8(0,1);
+                        readFeaturesTrain();
+                        break;
+                    // analog inputs
+                    case "/robot/analogOff":
+                        bufferToSend.write("A",0);
+                        bufferToSend.writeUInt8(0,1);
+                        break;
+                    case "/robot/analogOn":
+                        bufferToSend.write("A",0);
+                        bufferToSend.writeUInt8(1,1);
+                        bufferToSend.writeUInt8(msg[1],2);
+                        break;
+                    default:
+                        bufferToSend.write("M",0);
+                  }
+
+                  console.log("Sending BT msg " + bufferToSend + " " + bufferToSend[1].toString() + " " + bufferToSend[2].toString() + " " + bufferToSend[3].toString(),bufferToSend);
+                  commandCharacteristic.write(bufferToSend, false);
+                } else if (msg[0].indexOf("/ding2/") >=0) {
+                  // send to raspberry pi
+                  var validMsg = true;
+                  var ctrlMessage = new osc.Message(msg[0]);
+                  switch(msg[0]) {
+                    case "/ding2/recognize":
+                      ctrlMessage.append(msg[1]);
+                      break;
+                    case "/ding2/speak":
+                      ctrlMessage.append(msg[2]);
+                      console.log("message: " + msg)
+                      break;
+                    case "/ding2/listen":
+                      ctrlMessage.append(msg[1]);
+                      console.log("message: " + msg)
+                      break;
+                    default:
+                      console.log("unknown message: " + msg)
+                      validMsg = false;
+                      break;
+                  }
+                  if (validMsg) {
+                    console.log("SENDING TO PI: " + msg[0]);
+                    toPi.send(ctrlMessage);
+                  }
                 }
 
-                console.log("Sending BT msg " + bufferToSend + " " + bufferToSend[1].toString() + " " + bufferToSend[2].toString() + " " + bufferToSend[3].toString(),bufferToSend);
-                commandCharacteristic.write(bufferToSend, false);
-              } else if (msg[0].indexOf("/ding2/") >=0) {
-                // send to raspberry pi
-                var validMsg = true;
-                var ctrlMessage = new osc.Message(msg[0]);
-                switch(msg[0]) {
-                  case "/ding2/recognize":
-                    ctrlMessage.append(msg[1]);
-                    break;
-                  case "/ding2/speak":
-                    ctrlMessage.append(msg[2]);
-                    console.log("message: " + msg)
-                    break;
-                  case "/ding2/listen":
-                    ctrlMessage.append(msg[1]);
-                    console.log("message: " + msg)
-                    break;
-                  default:
-                    console.log("unknown message: " + msg)
-                    validMsg = false;
-                    break;
-                }
-                if (validMsg) {
-                  console.log("SENDING TO PI: " + msg[0]);
-                  toPi.send(ctrlMessage);
-                }
-              }
-
+          });
         });
       });
     });
-  });
+  }
 });
 
 // evaluate case for classification and send result to unity
@@ -327,12 +354,13 @@ function readFeaturesTrain() {
 
   // once the file is loaded, process the data
   lineReader.on('close', function (line) {
-    console.log("all lines in file read");
-
+    console.log(lines.length + " lines in file read");
+    var gestureName = "";
     // go through the data lines
     for (var i=0; i<lines.length; i++) {
       // set the category for data
-      var gestureTrainingSet = { input: [], label: lines[i][0] };
+      var label = lines[i][0];
+      var gestureTrainingSet = { input: [], label: label };
       // get the x,y,z data
       for (var n=1; n<lines[i].length; n+=3) {
         var x = parseFloat(lines[i][n]);
@@ -343,8 +371,12 @@ function readFeaturesTrain() {
       }
 
       // add a gesture dataset to series
-      console.log("trainingset " + lines[i][0] + ": " + gestureTrainingSet.input.length);
+      //console.log("trainingset " + lines[i][0] + ": " + gestureTrainingSet.input.length);
       seriesSet.push(gestureTrainingSet);
+      if (gestureName != label) {
+        console.log("category " + label);
+        gestureName = label
+      }
     }
     // train the model
     if (seriesSet.length > 2) {
@@ -398,5 +430,37 @@ function handleImu(data, isNotification) {
       //console.log("logging data: " + writeData);
     }
     //console.log("xyz: " + xProcessed + " " + yProcessed + " " + zProcessed);
+  }
+}
+
+function displayPeripheral (peripheral) {
+
+  console.log('peripheral with ID ' + peripheral.id + ' found');
+  var advertisement = peripheral.advertisement;
+
+  var localName = advertisement.localName;
+  var txPowerLevel = advertisement.txPowerLevel;
+  var manufacturerData = advertisement.manufacturerData;
+  var serviceData = advertisement.serviceData;
+  var serviceUuids = advertisement.serviceUuids;
+
+  if (localName) {
+    console.log('  Local Name        = ' + localName);
+  }
+
+  if (txPowerLevel) {
+    console.log('  TX Power Level    = ' + txPowerLevel);
+  }
+
+  if (manufacturerData) {
+    console.log('  Manufacturer Data = ' + manufacturerData.toString('hex'));
+  }
+
+  if (serviceData) {
+    console.log('  Service Data      = ' + JSON.stringify(serviceData, null, 2));
+  }
+
+  if (serviceUuids) {
+    console.log('  Service UUIDs     = ' + serviceUuids);
   }
 }

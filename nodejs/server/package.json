@@ -8,16 +8,16 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/virgilvox/curie-ble-example-js.git"
+    "url": "git+https://github.com/pvanallen/delft-toolkit.git"
   },
   "author": "",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/virgilvox/curie-ble-example-js/issues"
+    "url": "https://github.com/pvanallen/delft-toolkit/issues"
   },
-  "homepage": "https://github.com/virgilvox/curie-ble-example-js#readme",
+  "homepage": "https://github.com/pvanallen/delft-toolkit/#readme",
   "dependencies": {
-    "noble": "^1.8.0",
+    "noble": "git://github.com/jacobrosenthal/noble.git#highsierra",
     "node-osc": "^2.1.0",
     "rapidlib": "^1.0.7"
   }
