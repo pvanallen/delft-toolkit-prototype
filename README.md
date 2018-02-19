@@ -27,10 +27,10 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
 
 ## Starting the system
 1. **Power robot**: Power on the Arduino and Raspberry Pi (RPi)
-   * **Adapters**:
+   1. **Adapters**:
      * **Arduino**: Connect a USB cable from computer to Arduino
      * **RPi**: Connect a wall power adapter to the micro-usb connector
-   * **Batteries**:
+   1. **Batteries**:
      * **Arduino**: Turn on the 9V battery
      * **Motors**: Turn on the AA battery pack
      * **RPi**: Connect the fast charging USB battery to the micro USB connector
