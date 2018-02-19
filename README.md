@@ -59,7 +59,7 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
     1. Note that the Unity project may crash if the Node process is not already running when you Play.
 
 ## Installing The software
-Currently for my students - some details may not be fully worked out
+Currently for my students -- some details may not be fully worked out
 
 1. **Install dependencies**: [Unity3D](https://store.unity.com), [NodeCanvas](https://assetstore.unity.com/packages/tools/visual-scripting/nodecanvas-14914), [Arduino IDE](https://www.arduino.cc/en/Main/Software), [Node.js](https://nodejs.org/en/)
 1. **Download the toolkit software** and place on your computer drive
