@@ -71,6 +71,7 @@ import socket
 import sys
 import json
 import urllib
+import urllib.request
 import subprocess
 import pycurl
 #import StringIO
@@ -237,6 +238,7 @@ def take_picture_recognize(address, arg1):
     print("picture ready")
 
 def speak(address, arg1):
+  print("Speaking...")
   os.system("pico2wave -w speaknow.wav '" + arg1 + "' && sox speaknow.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav" )
   #os.system("flite -voice awb -t '" + arg1 + "'" )
   #os.system("flite -t 'I am thinking about what you showed me...'" )
@@ -447,7 +449,7 @@ if __name__ == '__main__':
       '--model_dir',
       type=str,
       #default='/tmp/imagenet',
-      default='/home/inception',
+      default='/home/pi/inception',
       help="""\
       Path to classify_image_graph_def.pb,
       imagenet_synset_to_human_label_map.txt, and
