@@ -3,7 +3,6 @@
 
 The Delft Toolkit a system for designing smart things. It provides a visual authoring environment that incorporates machine learning and behavior trees to create smart behavior in autonomous devices.
 
-![system diagram](https://i0.wp.com/www.philvanallen.com/wp-content/uploads/2018/01/Pasted_Image_1_16_18__3_50_PM.jpg)
 ![system diagram](https://i0.wp.com/www.philvanallen.com/wp-content/uploads/2018/01/Pasted_Image_1_16_18__3_50_PM.jpg?resize=640%2C350)
 
 The toolkit is currently in rough prototype form as a part of my research. **It is likely to change significantly as I iteratively develop a technical and design strategy.**
@@ -24,7 +23,7 @@ The system currently has two parts:
 
 Each of these has a codebase, and includes a range of libraries. In particular, the Unity system is based on the [NodeCanvas](http://nodecanvas.paradoxnotion.com) paid asset for Unity3D, and provides the foundation for the visual authoring of behavior trees. My hope is to eventually make this part of the system free in some way.
 
-![detailed diagram](http://www.philvanallen.com/wp-content/uploads/2017/08/tool-architecture-diagram.002.jpeg)
+![detailed diagram](http://www.philvanallen.com/wp-content/uploads/2017/08/tool-architecture-diagram.002.jpeg?resize=640%2C350)
 
 ## Starting the system
 1. **Power robot**: Power on the Arduino and Raspberry Pi (RPi)
