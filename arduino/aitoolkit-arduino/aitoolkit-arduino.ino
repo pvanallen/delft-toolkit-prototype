@@ -39,10 +39,10 @@ Scheduler runner;
 // NeoPixel setup
 //
 #define NEOPIN 6
-#define NUMPIXELS 13
-Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800 );
+#define NUMPIXELS 12
+//Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, NEOPIN, NEO_GRB + NEO_KHZ800 );
+Adafruit_NeoPixel pixel = Adafruit_NeoPixel(NUMPIXELS, NEOPIN, NEO_RGBW + NEO_KHZ800 );
 
-const int ledPin = 13; // set ledPin to use on-board LED
 char commandCharLocal[32] ;
 
 bool blinkState = false;
@@ -129,7 +129,7 @@ void setup() {
 
   // Setup the neopixel
   pixel.begin();
-  pixel.setBrightness(90); //medium brightness
+  pixel.setBrightness(127); //medium brightness
   pixel.show();
 
 
