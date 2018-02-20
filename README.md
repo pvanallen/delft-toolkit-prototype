@@ -61,7 +61,7 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
 ## Installing The software
 Currently for my students -- some details may not be fully worked out
 
-1. **Install dependencies**: [Unity3D](https://store.unity.com), [NodeCanvas](https://assetstore.unity.com/packages/tools/visual-scripting/nodecanvas-14914), [Arduino IDE](https://www.arduino.cc/en/Main/Software), [Node.js](https://nodejs.org/en/)
+1. **Install dependencies**: [Unity3D](https://store.unity.com), [NodeCanvas](https://assetstore.unity.com/packages/tools/visual-scripting/nodecanvas-14914), [Arduino IDE](https://www.arduino.cc/en/Main/Software), [Node.js](https://nodejs.org/en/), (Mac) [Xcode](https://geo.itunes.apple.com/us/app/xcode/id497799835?mt=12) and accept dependencies
 1. **Download the toolkit software** and place on your computer drive
    * Software from github
    * Disk image for [RPi](https://www.dropbox.com/s/f79kt8v7ear3i1z/delftbot_backup.img?dl=0)
@@ -72,7 +72,9 @@ Currently for my students -- some details may not be fully worked out
    * Set up your WiFi
    * Change the hostname from the default of delftbt0 (e.g. delftbt1, delftbt2, etc.) if you are using more than one robot on your network
 1. **Node.js**:
+   * Open Xcode and accept the license terms
    * Open a terminal window and CD into the nodejs folder, and run
    * **npm install**
 1. **Unity3D**:
    * Install NodeCanvas in the toolkit Project if it is not there
+   * Click on the Project tab, and double click the "Main" scene
