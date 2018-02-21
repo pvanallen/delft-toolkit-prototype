@@ -56,7 +56,7 @@ python3 raspi-ding-server.py --server_ip 10.0.1.15
 cd /Users/Yourname/directoryWhereYouPutIt
 node hub 10.0.1.28 delftbt0
 ```
-     The easiest way to do the "**cd**" command is to select the directory in the finder, and drag it into the temrinal window to get the path.
+     * The easiest way to do the "**cd**" command is to select the directory in the finder, and drag it into the temrinal window to get the path.
      * In the "**node**" command, change the IP address to that of your RPi, and the last digit of "delftbot0" to number of your setup.
    * **Unity3D**:
      * Open the "delft-toolkit" project in Unity3D
