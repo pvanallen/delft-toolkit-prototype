@@ -43,14 +43,21 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
    * **RPi**: On the command line, type the command: **ifconfig** In the output section for "wlan0" you'll see the IP address
 1. **Start software**: In the following order
    * **Arduino**: Power on the device
-   * **RPi**: In the terminal connected to the RPi, type:   
-     * **cd /home/pi/tutorials/image/imagenet**
-     * **python3 raspi-ding-server.py --server_ip 10.0.1.15**
+   * **RPi**:
+     *  In the terminal connected to the RPi, type:
+```
+cd /home/pi/tutorials/image/imagenet
+python3 raspi-ding-server.py --server_ip 10.0.1.15
+```
      * In the above command, change the IP address to that of your computer. The software will take a minute or two to finish setting up the TensorFlow model.
-   * **Node.js**: Open a new terminal window/tab, and type the following:
-     * **cd /Users/Yourname/directoryWhereYouPutIt** The easiest way to do this is to select the directory in the finder, and drag it into the temrinal window to get the path.
-     * **node hub 10.0.1.28 delftbt0**
-     * In the above command, change the IP address to that of your RPi, and the last digit of "delftbot0" to number of your setup.
+   * **Node.js**:
+     * Open a new terminal window/tab, and type the following:
+```
+cd /Users/Yourname/directoryWhereYouPutIt
+node hub 10.0.1.28 delftbt0
+```
+     The easiest way to do the "**cd**" command is to select the directory in the finder, and drag it into the temrinal window to get the path.
+     * In the "**node**" command, change the IP address to that of your RPi, and the last digit of "delftbot0" to number of your setup.
    * **Unity3D**:
      * Open the "delft-toolkit" project in Unity3D
      * In the Hierarchy, click on the "Main Camera" and then open the "Canvas" tab
