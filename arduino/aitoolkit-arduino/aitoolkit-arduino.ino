@@ -15,7 +15,7 @@
 
 // used by Node.js to select which robot to connect to if
 // so more than one can be in a space at the same time
-#define BOTNAME "delftbt1"
+#define BOTNAME "delftbt0"
 
 // TaskScheduler Setup
 //
