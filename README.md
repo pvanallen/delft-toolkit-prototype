@@ -46,6 +46,7 @@ Each of these has a codebase, and includes a range of libraries. In particular, 
    * **RPi**:
      *  In the terminal connected to the RPi, type:
 ```
+ssh pi@delftbt0.local
 cd /home/pi/tutorials/image/imagenet
 python3 raspi-ding-server.py --server_ip 10.0.1.15
 ```
