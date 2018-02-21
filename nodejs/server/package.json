@@ -19,6 +19,6 @@
   "dependencies": {
     "noble": "git://github.com/jacobrosenthal/noble.git#highsierra",
     "node-osc": "^2.1.0",
-    "rapidlib": "^1.0.7"
+    "rapidlib": "^1.2.0"
   }
 }
