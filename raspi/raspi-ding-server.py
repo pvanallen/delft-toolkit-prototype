@@ -229,20 +229,22 @@ def take_picture_recognize(address, arg1):
   global picture_being_taken
   # take and write a snapshot to a file
   if arg1 == 1 and picture_ready == False and picture_being_taken == False:
+
     picture_being_taken = True
     image = os.path.join(FLAGS.model_dir, 'object-image.jpg')
     print("taking picture...")
     camera.capture(image)
+    print("false phone message")
+    client.send_message("/ding2/nomessage", "phone")
+    print("picture ready")
+    time.sleep(0.2)
     picture_ready = True
     picture_being_taken = False
-    print("picture ready")
+
 
 def speak(address, arg1):
   print("Speaking...")
   os.system("pico2wave -w speaknow.wav '" + arg1 + "' && sox speaknow.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav" )
-  #os.system("flite -voice awb -t '" + arg1 + "'" )
-  #os.system("flite -t 'I am thinking about what you showed me...'" )
-  #pico2wave -w speaknow.wav "hello there!" && sox lookdave.wav -c 2 speaknowstereo.wav && aplay -Dhw:1 speaknowstereo.wav
 
 def isAudioPlaying():
 
@@ -411,8 +413,9 @@ def get_ip():
     return IP
 
 def main(_):
-  print("network: " + socket.gethostname() + " " + get_ip())
+  global client
   global picture_ready
+  print("network: " + socket.gethostname() + " " + get_ip())
   print("initializing model...")
   maybe_download_and_extract()
   # Creates graph from saved GraphDef
@@ -426,12 +429,10 @@ def main(_):
 
     if picture_ready:
       print("analyzing...")
-      #os.system("echo %s | festival --tts" % "I am thinking about what you showed me...")
-      #os.system("flite -t 'click' " )
-      #os.system("echo %s | flite -t " % "I am thinking about what you showed me...")
       image = os.path.join(FLAGS.model_dir, 'object-image.jpg')
       match_results = run_inference_on_image(image)
-      print(match_results)
+      print("sending to computer: " + match_results)
+      time.sleep(0.1)
       client.send_message("/ding2/objIdent", match_results)
       picture_ready = False
     time.sleep(0.1)
