@@ -1,6 +1,8 @@
 # Delft AI Toolkit
 ## Visual Authoring Toolkit for Smart Things
 
+**This repo is superseded by a new version here: https://github.com/pvanallen/delft-toolkit-v2**
+
 The Delft Toolkit a system for designing smart things. It provides a visual authoring environment that incorporates machine learning and behavior trees to create smart behavior in autonomous devices.
 
 ![system diagram](https://i0.wp.com/www.philvanallen.com/wp-content/uploads/2018/01/Pasted_Image_1_16_18__3_50_PM.jpg?resize=640%2C350)
